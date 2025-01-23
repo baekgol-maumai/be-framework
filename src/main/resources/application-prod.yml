@@ -1,0 +1,12 @@
+service:
+  document:
+    server-url:
+      - https://be-framework.maum.ai
+  security:
+    allowed-origins:
+      - https://be-framework.maum.ai
+      - http://localhost:3000
+      - http://localhost:1234
+  db:
+    uri: ${DB_URI}
+    database: ${DB_DATABASE}

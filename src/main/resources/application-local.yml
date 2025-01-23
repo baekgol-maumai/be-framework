@@ -1,0 +1,16 @@
+service:
+  document:
+    server-url:
+      - http://localhost:12345
+  security:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:1234
+  db:
+    uri: ${DB_URI}
+    database: ${DB_DATABASE}
+logging:
+  level:
+    ai:
+      maum:
+        beframework: DEBUG

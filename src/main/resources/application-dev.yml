@@ -1,0 +1,17 @@
+service:
+  document:
+    server-url:
+      - https://be-framework-dev.maum.ai
+  security:
+    allowed-origins:
+      - https://be-framework-dev.maum.ai
+      - http://localhost:3000
+      - http://localhost:1234
+  db:
+    uri: ${DB_URI}
+    database: ${DB_DATABASE}
+logging:
+  level:
+    ai:
+      maum:
+        beframework: DEBUG

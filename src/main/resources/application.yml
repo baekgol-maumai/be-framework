@@ -1,0 +1,35 @@
+server:
+  port: 12345
+spring:
+  profiles:
+    active: local
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+springdoc:
+  swagger-ui:
+    path: /doc
+    tags-sorter: alpha
+    default-models-expand-depth: -1
+service:
+  document:
+    title: 백엔드 프레임워크 API 문서
+    desc: 백엔드 프레임워크 API 문서입니다.
+  security:
+    allowed-headers:
+      - Content-Type
+      - Authorization
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+    excluded-paths:
+      - /
+      - /favicon.ico
+      - /doc
+      - /login
+      - /actuator/health
+  websocket:
+    port: 12346
