@@ -96,9 +96,9 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
     }
 
     /**
-     * 이벤트 리스너 추가
+     * 사용자 대상 이벤트 리스너 추가
      */
-    protected void addEventListener(String roomId, String userId, Event event, Emitter.Listener listener) {
+    protected void addEventListenerByUser(String roomId, String userId, Event event, Emitter.Listener listener) {
         final ConcurrentMap<String, Socket> users = messengers.get(roomId);
         if(users == null) throw BaseException.of(WebSocketCodeMsg.ROOM_ID_NOT_EXIST);
 
