@@ -82,14 +82,21 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
     }
 
     /**
-     * 연결된 웹 소켓 서버 메시지 송신
+     * 연결된 클라이언트에 메시지를 전송한다.
+     */
+    protected void sendToClient(SocketIOClient client, Event event, Object[] args) {
+        sendToClient(client, event, convertToJsonObjectByMessage(event, args));
+    }
+
+    /**
+     * 특정 사용자를 주체로 하여 원격지 웹 소켓 서버로 메시지를 전송한다.
      */
     protected void sendToTarget(String roomId, String userId, Event event) {
         doSendToTarget(roomId, userId, event, null);
     }
 
     /**
-     * 연결된 웹 소켓 서버 메시지 송신
+     * 특정 사용자를 주체로 하여 원격지 웹 소켓 서버로 메시지를 전송한다.
      */
     protected void sendToTarget(String roomId, String userId, Event event, Message message) {
         doSendToTarget(roomId, userId, event, message);
