@@ -60,7 +60,7 @@ import java.util.function.Consumer;
 /**
  * 중계 웹 소켓 핸들러
  * @author baekgol@maum.ai
- * @version 1.0.1
+ * @version 1.0.0
  */
 @Slf4j
 public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
