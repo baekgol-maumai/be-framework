@@ -74,6 +74,12 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
     }
 
     /**
+     * 웹 소켓 연결 완료 후 초기화
+     */
+    @Override
+    protected void initAfterConnect(SocketIOClient client) {}
+
+    /**
      * 웹 소켓 오류 발생 이벤트
      */
     @Override
