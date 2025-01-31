@@ -6,7 +6,6 @@ import ai.maum.beframework.vo.meta.task.chat.ChatType;
 import ai.maum.beframework.vo.meta.task.engine.EngineType;
 import ai.maum.beframework.vo.meta.task.engine.llm.LlmPrompt;
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 
@@ -69,7 +68,6 @@ public record TaskRequestMessage(Input<?> input,
                 }
             }
 
-            @JsonIgnoreProperties({ "beamWidth" })
             public record LlmEngineConfig(
                     Float topP,
                     Integer topK,
@@ -121,7 +119,6 @@ public record TaskRequestMessage(Input<?> input,
                 }
             }
 
-            @JsonIgnoreProperties({ "lang", "speaker", "audioEncoding", "durationRate", "emotion", "profile", "speakerName" })
             public record TtsEngineConfig(
                     Integer lang,
                     @JsonAlias("sampleRate")
