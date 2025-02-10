@@ -8,7 +8,7 @@ import org.bson.types.ObjectId;
 import java.io.IOException;
 
 /**
- * 문자열을 ObjectId로 역직렬화하는 Deserializer
+ * 문자열을 ObjectId로 변환하는 역직렬화기
  * @author baekgol@maum.ai
  */
 public class ObjectIdDeserializer extends JsonDeserializer<ObjectId> {

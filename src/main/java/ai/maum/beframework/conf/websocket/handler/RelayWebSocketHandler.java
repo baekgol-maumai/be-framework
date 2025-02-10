@@ -175,6 +175,7 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                     case CHATBOT -> !detailNode.isNull("type")
                                                             ? new TaskMessageDelegatorInfo.EngineDetail(EngineType.LLM, detailNode.getString("model"))
                                                             : new TaskMessageDelegatorInfo.ChatbotDetail(detailNode.getString("host"));
+                                                    case RAG -> new TaskMessageDelegatorInfo.RagDetail();
                                                 })
                                                 .build();
                                     } catch(JSONException e) {
@@ -273,7 +274,10 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                         case NOTICE -> ((TaskRequestMessage.TaskInfo.ChatParam.NoticeChatInput)trm.input()).value(); }; }
                                 case CHATBOT -> {
                                     final TaskRequestMessage.TaskInfo.ChatbotParam cbp = (TaskRequestMessage.TaskInfo.ChatbotParam)firstTask.param();
-                                    yield ((TaskRequestMessage.TaskInfo.ChatbotParam.CommonChatbotInput)trm.input()).value(); } })
+                                    yield ((TaskRequestMessage.TaskInfo.ChatbotParam.CommonChatbotInput)trm.input()).value(); }
+                                case RAG -> {
+                                    final TaskRequestMessage.TaskInfo.RagParam rp = (TaskRequestMessage.TaskInfo.RagParam)firstTask.param();
+                                    yield ((TaskRequestMessage.TaskInfo.RagParam.CommonRagInput)trm.input()).value(); }})
                             .orElseThrow(() -> BaseException.of(SystemCodeMsg.CONVERT_FAILURE)),
                     "tasks", new JSONArray(trm.tasks()
                             .stream()
@@ -290,8 +294,8 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                         case LLM -> {
                                                             final TaskRequestMessage.TaskInfo.EngineParam.LlmEngineConfig lec = (TaskRequestMessage.TaskInfo.EngineParam.LlmEngineConfig)ep.config();
                                                             yield new JSONObject(Map.of(
-                                                                    "top_p", lec.topP(),
                                                                     "top_k", lec.topK(),
+                                                                    "top_p", lec.topP(),
                                                                     "temperature", lec.temperature(),
                                                                     "presence_penalty", lec.presencePenalty(),
                                                                     "frequency_penalty", lec.frequencyPenalty(),
@@ -332,7 +336,18 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                             final TaskRequestMessage.TaskInfo.ChatbotParam.CommonChatbotConfig ccbc = (TaskRequestMessage.TaskInfo.ChatbotParam.CommonChatbotConfig)cbp.config();
                                             yield new JSONObject(Map.of(
                                                     "host", cbp.host(),
-                                                    "config", new JSONObject())); } })))
+                                                    "config", new JSONObject())); }
+                                        case RAG -> {
+                                            final TaskRequestMessage.TaskInfo.RagParam rp = (TaskRequestMessage.TaskInfo.RagParam)task.param();
+                                            final TaskRequestMessage.TaskInfo.RagParam.CommonRagConfig crc = (TaskRequestMessage.TaskInfo.RagParam.CommonRagConfig)rp.config();
+                                            yield new JSONObject(Map.of(
+                                                    "top_k", crc.topK(),
+                                                    "top_p", crc.topP(),
+                                                    "temperature", crc.temperature(),
+                                                    "presence_penalty", crc.presencePenalty(),
+                                                    "frequency_penalty", crc.frequencyPenalty(),
+                                                    "beam_width", crc.beamWidth()));
+                                        }})))
                             .toList()),
                     "send_last_only", trm.sendLastOnly()));
         else if(message instanceof RoomMessageDelegator<?> rmd)

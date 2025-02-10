@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * LocalDateTime을 날짜 및 시간 형식의 문자열로 직렬화하는 Serializer
+ * LocalDateTime을 날짜 및 시간 형식의 문자열로 변환하는 직렬화기
  * @author baekgol@maum.ai
  */
 public class LocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {

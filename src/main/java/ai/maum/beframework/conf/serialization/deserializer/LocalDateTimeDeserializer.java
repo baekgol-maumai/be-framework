@@ -13,6 +13,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * 날짜 및 시간 형식의 문자열을 LocalDateTime으로 변환하는 역직렬화기
+ * @author baekgol@maum.ai
+ */
 @Slf4j
 public class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

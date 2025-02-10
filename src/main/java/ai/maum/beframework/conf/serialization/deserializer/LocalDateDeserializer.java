@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 /**
- * 날짜 형식의 문자열을 LocalDate로 역직렬화하는 Deserializer
+ * 날짜 형식의 문자열을 LocalDate로 변환하는 역직렬화기
  * @author baekgol@maum.ai
  */
 public class LocalDateDeserializer extends JsonDeserializer<LocalDate> {

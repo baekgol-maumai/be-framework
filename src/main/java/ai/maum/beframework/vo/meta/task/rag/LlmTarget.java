@@ -1,4 +1,4 @@
-package ai.maum.beframework.vo.meta.task;
+package ai.maum.beframework.vo.meta.task.rag;
 
 import ai.maum.beframework.codemessage.SystemCodeMsg;
 import ai.maum.beframework.vo.BaseException;
@@ -9,21 +9,19 @@ import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
 
 /**
- * 작업 유형
+ * LLM 요청 대상
  * @author baekgol@maum.ai
  */
 @Getter
 @RequiredArgsConstructor
-public enum TaskType implements Type {
-    ENGINE("엔진"),
-    CHAT("대화"),
-    CHATBOT("챗봇"),
-    RAG("RAG");
+public enum LlmTarget implements Type {
+    ORCHESTRA("오케스트라"),
+    OLLAMA("Ollama");
 
     private final String name;
 
-    public static TaskType from(String value) {
-        return Arrays.stream(TaskType.values())
+    public static LlmTarget from(String value) {
+        return Arrays.stream(LlmTarget.values())
                 .filter(v -> v.name().equals(value))
                 .findAny()
                 .orElseThrow(() -> BaseException.of(SystemCodeMsg.PARAM_WRONG));

@@ -18,6 +18,7 @@ import org.bson.types.ObjectId;
 /**
  * 작업 메시지 정보
  * @author baekgol@maum.ai
+ * @version 1.0.0
  */
 @Getter
 @SuperBuilder
@@ -50,6 +51,10 @@ public class TaskMessageInfo extends RoomMessageInfo {
     ) implements Detail {
     }
 
+    public record RagDetail(
+    ) implements Detail {
+    }
+
     @JsonCreator
     public TaskMessageInfo(
             @JsonProperty("task_id") ObjectId taskId,
@@ -59,11 +64,12 @@ public class TaskMessageInfo extends RoomMessageInfo {
         this.taskId = taskId;
         this.taskType = taskType;
         this.result = result;
-        detail = switch (taskType) {
-            case ENGINE -> new EngineDetail(EngineType.from(detailNode.get("type").asText()), detailNode.get("model").asText());
-            case CHAT -> new ChatDetail(ChatType.from(detailNode.get("type").asText()));
+        detail = switch(taskType) {
+            case ENGINE -> new TaskMessageInfo.EngineDetail(EngineType.from(detailNode.get("type").asText()), detailNode.get("model").asText());
+            case CHAT -> new TaskMessageInfo.ChatDetail(ChatType.from(detailNode.get("type").asText()));
             case CHATBOT -> detailNode.get("type") != null
-                    ? new EngineDetail(EngineType.LLM, detailNode.get("model").asText())
-                    : new ChatbotDetail(detailNode.get("host").asText()); };
+                    ? new TaskMessageInfo.EngineDetail(EngineType.LLM, detailNode.get("model").asText())
+                    : new TaskMessageInfo.ChatbotDetail(detailNode.get("host").asText());
+            case RAG -> new TaskMessageInfo.RagDetail(); };
     }
 }

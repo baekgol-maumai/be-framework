@@ -4,14 +4,17 @@ import ai.maum.beframework.util.StringUtil;
 import ai.maum.beframework.vo.meta.Message;
 import ai.maum.beframework.vo.meta.task.chat.ChatType;
 import ai.maum.beframework.vo.meta.task.engine.EngineType;
+import ai.maum.beframework.vo.meta.task.engine.llm.LlmMultiTurnPrompt;
 import ai.maum.beframework.vo.meta.task.engine.llm.LlmPrompt;
 import com.fasterxml.jackson.annotation.JsonAlias;
+import org.bson.types.ObjectId;
 
 import java.util.List;
 
 /**
  * 작업 요청 메시지
  * @author baekgol@maum.ai
+ * @version 1.0.0
  */
 public record TaskRequestMessage(Input<?> input,
                                  List<TaskInfo> tasks,
@@ -34,7 +37,7 @@ public record TaskRequestMessage(Input<?> input,
                 EngineType type,
                 String model,
                 String conversationId,
-                List<LlmPrompt> prompts,
+                List<LlmMultiTurnPrompt> prompts,
                 EngineConfig config
         ) implements Param {
             public interface EngineInput<T> extends Input<T> {}
@@ -69,8 +72,8 @@ public record TaskRequestMessage(Input<?> input,
             }
 
             public record LlmEngineConfig(
-                    Float topP,
                     Integer topK,
+                    Float topP,
                     Float temperature,
                     Float presencePenalty,
                     Float frequencyPenalty,
@@ -81,14 +84,14 @@ public record TaskRequestMessage(Input<?> input,
                     String result = "";
                     boolean isFirst = true;
 
-                    if(topP != null) {
-                        result += ("Top P: " + topP);
+                    if(topK != null) {
+                        result += ("Top K: " + topK);
                         isFirst = false;
                     }
 
-                    if(topK != null) {
+                    if(topP != null) {
                         if(!isFirst) result += ", ";
-                        result += ("Top K: " + topK);
+                        result += ("Top P: " + topP);
                         isFirst = false;
                     }
 
@@ -290,6 +293,74 @@ public record TaskRequestMessage(Input<?> input,
                         + host
                         + ", 설정: "
                         + config;
+            }
+        }
+
+        public record RagParam(
+                ObjectId id,
+                List<LlmPrompt> prompts,
+                RagConfig config
+        ) implements Param {
+            public interface RagInput<T> extends Input<T> {}
+            public interface RagConfig extends Config {}
+
+            public record CommonRagInput(String value) implements RagInput<String> {
+            }
+
+            public record CommonRagConfig(
+                    Integer topK,
+                    Float topP,
+                    Float temperature,
+                    Float presencePenalty,
+                    Float frequencyPenalty,
+                    Integer beamWidth
+            ) implements RagConfig {
+                @Override
+                public String toString() {
+                    String result = "";
+                    boolean isFirst = true;
+
+                    if(topK != null) {
+                        result += ("Top K: " + topK);
+                        isFirst = false;
+                    }
+
+                    if(topP != null) {
+                        if(!isFirst) result += ", ";
+                        result += ("Top P: " + topP);
+                        isFirst = false;
+                    }
+
+                    if(temperature != null) {
+                        if(!isFirst) result += ", ";
+                        result += ("Temperature: " + temperature);
+                        isFirst = false;
+                    }
+
+                    if(presencePenalty != null) {
+                        if(!isFirst) result += ", ";
+                        result += ("Presence Penalty: " + presencePenalty);
+                        isFirst = false;
+                    }
+
+                    if(frequencyPenalty != null) {
+                        if(!isFirst) result += ", ";
+                        result += ("Frequency Penalty: " + frequencyPenalty);
+                        isFirst = false;
+                    }
+
+                    if(beamWidth != null) {
+                        if(!isFirst) result += ", ";
+                        result += ("Beam Width: " + beamWidth);
+                    }
+
+                    return result;
+                }
+            }
+
+            @Override
+            public String toString() {
+                return "설정: " + config;
             }
         }
 

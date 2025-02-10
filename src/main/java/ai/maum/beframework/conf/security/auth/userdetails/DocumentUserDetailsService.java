@@ -1,25 +1,25 @@
-package ai.maum.beframework.conf.security;
+package ai.maum.beframework.conf.security.auth.userdetails;
 
 import ai.maum.beframework.model.repository.DocumentUserRepository;
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import reactor.core.publisher.Mono;
 
 /**
- * 기본 사용자 인증 서비스
+ * API 문서 사용자 인증 서비스
  * @author baekgol@maum.ai
  */
-public class BaseUserDetailsService implements ReactiveUserDetailsService {
+public class DocumentUserDetailsService extends BaseUserDetailsService {
     private final DocumentUserRepository documentUserRepository;
 
-    BaseUserDetailsService(DocumentUserRepository documentUserRepository) {
+    public DocumentUserDetailsService(DocumentUserRepository documentUserRepository) {
+        super();
         this.documentUserRepository = documentUserRepository;
     }
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
         return documentUserRepository.findByAccount(username)
-                .map(du -> BaseUserDetails.builder()
+                .map(du -> DocumentUserDetails.builder()
                         .username(username)
                         .password(du.getPassword())
                         .build());

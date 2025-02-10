@@ -8,7 +8,7 @@ import org.bson.types.ObjectId;
 import java.io.IOException;
 
 /**
- * ObjectId를 문자열로 직렬화하는 Serializer
+ * ObjectId를 문자열로 변환하는 직렬화기
  * @author baekgol@maum.ai
  */
 public class ObjectIdSerializer extends JsonSerializer<ObjectId> {

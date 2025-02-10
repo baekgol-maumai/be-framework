@@ -19,6 +19,7 @@ import java.time.LocalTime;
 /**
  * 방 메시지 정보
  * @author baekgol@maum.ai
+ * @version 1.0.0
  */
 @Getter
 @SuperBuilder

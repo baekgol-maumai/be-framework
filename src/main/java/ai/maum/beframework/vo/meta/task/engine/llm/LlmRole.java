@@ -2,7 +2,6 @@ package ai.maum.beframework.vo.meta.task.engine.llm;
 
 import ai.maum.beframework.codemessage.SystemCodeMsg;
 import ai.maum.beframework.vo.BaseException;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 
@@ -21,7 +20,6 @@ public enum LlmRole {
     @JsonValue
     private final String code;
 
-    @JsonCreator
     public static LlmRole of(String role) {
         return Arrays.stream(LlmRole.values())
                 .filter(e -> e.code.equals(role))

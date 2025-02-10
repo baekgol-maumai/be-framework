@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 /**
- * LocalDate를 날짜 형식의 문자열로 직렬화하는 Serializer
+ * LocalDate를 날짜 형식의 문자열로 변환하는 직렬화기
  * @author baekgol@maum.ai
  */
 public class LocalDateSerializer extends JsonSerializer<LocalDate> {

@@ -1,17 +1,21 @@
 package ai.maum.beframework.conf.security;
 
-import ai.maum.beframework.model.repository.DocumentUserRepository;
 import ai.maum.beframework.conf.properties.SecurityProperties;
+import ai.maum.beframework.conf.security.auth.manager.DocumentUserDetailsAuthenticationManager;
+import ai.maum.beframework.conf.security.auth.manager.MainUserDetailsAuthenticationManager;
+import ai.maum.beframework.conf.security.auth.userdetails.DocumentUserDetailsService;
+import ai.maum.beframework.conf.security.auth.userdetails.MainUserDetailsService;
+import ai.maum.beframework.conf.security.encoder.DocumentPasswordEncoder;
+import ai.maum.beframework.conf.security.encoder.MainPasswordEncoder;
+import ai.maum.beframework.model.repository.DocumentUserRepository;
+import ai.maum.beframework.model.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.config.Customizer;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
@@ -30,7 +34,9 @@ import java.util.List;
 public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http,
-                                                            ReactiveAuthenticationManager authenticationManager,
+                                                            UserRepository userRepository,
+                                                            MainUserDetailsAuthenticationManager mainAuthenticationManager,
+                                                            DocumentUserDetailsAuthenticationManager documentAuthenticationManager,
                                                             SecurityProperties securityProperties) {
         final String[] excludedPaths = securityProperties.getExcludedPaths();
 
@@ -39,8 +45,8 @@ public class SecurityConfig {
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(excludedPaths).permitAll()
                         .anyExchange().authenticated())
-                .formLogin(Customizer.withDefaults())
-                .addFilterAt(new JwtFilter(Arrays.asList(excludedPaths), authenticationManager), SecurityWebFiltersOrder.AUTHENTICATION)
+                .formLogin(formLoginSpec -> formLoginSpec.authenticationManager(documentAuthenticationManager))
+                .addFilterAt(new JwtFilter(Arrays.asList(excludedPaths), userRepository, mainAuthenticationManager), SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
     }
 
@@ -67,12 +73,24 @@ public class SecurityConfig {
     }
 
     @Bean
-    public ReactiveAuthenticationManager authenticationManager(PasswordEncoder passwordEncoder, DocumentUserRepository documentUserRepository) {
-        return new BaseUserDetailsAuthenticationManager(passwordEncoder, new BaseUserDetailsService(documentUserRepository));
+    @Primary
+    public MainUserDetailsAuthenticationManager mainAuthenticationManager(MainPasswordEncoder passwordEncoder, UserRepository userRepository) {
+        return new MainUserDetailsAuthenticationManager(passwordEncoder, new MainUserDetailsService(userRepository));
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public DocumentUserDetailsAuthenticationManager documentAuthenticationManager(DocumentPasswordEncoder passwordEncoder, DocumentUserRepository documentUserRepository) {
+        return new DocumentUserDetailsAuthenticationManager(passwordEncoder, new DocumentUserDetailsService(documentUserRepository));
+    }
+
+    @Bean
+    @Primary
+    public MainPasswordEncoder mainPasswordEncoder() {
+        return new MainPasswordEncoder();
+    }
+
+    @Bean
+    public DocumentPasswordEncoder documentPasswordEncoder() {
+        return new DocumentPasswordEncoder();
     }
 }

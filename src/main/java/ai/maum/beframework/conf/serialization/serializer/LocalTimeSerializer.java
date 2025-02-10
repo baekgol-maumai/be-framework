@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * LocalTime을 시간 형식의 문자열로 직렬화하는 Serializer
+ * LocalTime을 시간 형식의 문자열로 변환하는 직렬화기
  * @author baekgol@maum.ai
  */
 public class LocalTimeSerializer extends JsonSerializer<LocalTime> {

@@ -1,8 +1,8 @@
-package ai.maum.beframework.conf.security;
+package ai.maum.beframework.conf.security.auth;
 
+import ai.maum.beframework.codemessage.SystemCodeMsg;
 import ai.maum.beframework.vo.BaseException;
 import ai.maum.beframework.vo.BaseResponse;
-import ai.maum.beframework.codemessage.SystemCodeMsg;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
