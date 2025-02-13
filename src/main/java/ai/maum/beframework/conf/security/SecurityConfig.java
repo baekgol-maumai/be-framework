@@ -1,12 +1,17 @@
 package ai.maum.beframework.conf.security;
 
 import ai.maum.beframework.conf.properties.SecurityProperties;
-import ai.maum.beframework.conf.security.auth.manager.DocumentUserDetailsAuthenticationManager;
-import ai.maum.beframework.conf.security.auth.manager.MainUserDetailsAuthenticationManager;
+import ai.maum.beframework.conf.security.auth.manager.AnonymousAuthenticationManager;
+import ai.maum.beframework.conf.security.auth.manager.DocumentAuthenticationManager;
+import ai.maum.beframework.conf.security.auth.manager.JwtAuthenticationManager;
+import ai.maum.beframework.conf.security.auth.userdetails.AnonymousUserDetailsService;
 import ai.maum.beframework.conf.security.auth.userdetails.DocumentUserDetailsService;
-import ai.maum.beframework.conf.security.auth.userdetails.MainUserDetailsService;
+import ai.maum.beframework.conf.security.auth.userdetails.JwtUserDetailsService;
+import ai.maum.beframework.conf.security.encoder.AnonymousPasswordEncoder;
 import ai.maum.beframework.conf.security.encoder.DocumentPasswordEncoder;
-import ai.maum.beframework.conf.security.encoder.MainPasswordEncoder;
+import ai.maum.beframework.conf.security.encoder.JwtPasswordEncoder;
+import ai.maum.beframework.conf.security.filter.AccessFilter;
+import ai.maum.beframework.conf.security.filter.JwtFilter;
 import ai.maum.beframework.model.repository.DocumentUserRepository;
 import ai.maum.beframework.model.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +26,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -35,18 +39,18 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http,
                                                             UserRepository userRepository,
-                                                            MainUserDetailsAuthenticationManager mainAuthenticationManager,
-                                                            DocumentUserDetailsAuthenticationManager documentAuthenticationManager,
+                                                            JwtAuthenticationManager jwtAuthenticationManager,
+                                                            DocumentAuthenticationManager documentAuthenticationManager,
+                                                            AnonymousAuthenticationManager anonymousAuthenticationManager,
                                                             SecurityProperties securityProperties) {
-        final String[] excludedPaths = securityProperties.getExcludedPaths();
-
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers(excludedPaths).permitAll()
+                        .pathMatchers(securityProperties.getExcludedPaths()).permitAll()
                         .anyExchange().authenticated())
                 .formLogin(formLoginSpec -> formLoginSpec.authenticationManager(documentAuthenticationManager))
-                .addFilterAt(new JwtFilter(Arrays.asList(excludedPaths), userRepository, mainAuthenticationManager), SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterBefore(new AccessFilter(securityProperties.getExcludedPaths(), anonymousAuthenticationManager), SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterBefore(new JwtFilter(userRepository, jwtAuthenticationManager), SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
     }
 
@@ -74,23 +78,33 @@ public class SecurityConfig {
 
     @Bean
     @Primary
-    public MainUserDetailsAuthenticationManager mainAuthenticationManager(MainPasswordEncoder passwordEncoder, UserRepository userRepository) {
-        return new MainUserDetailsAuthenticationManager(passwordEncoder, new MainUserDetailsService(userRepository));
+    public JwtAuthenticationManager jwtAuthenticationManager(JwtPasswordEncoder passwordEncoder, UserRepository userRepository) {
+        return new JwtAuthenticationManager(passwordEncoder, new JwtUserDetailsService(userRepository));
     }
 
     @Bean
-    public DocumentUserDetailsAuthenticationManager documentAuthenticationManager(DocumentPasswordEncoder passwordEncoder, DocumentUserRepository documentUserRepository) {
-        return new DocumentUserDetailsAuthenticationManager(passwordEncoder, new DocumentUserDetailsService(documentUserRepository));
+    public DocumentAuthenticationManager documentAuthenticationManager(DocumentPasswordEncoder passwordEncoder, DocumentUserRepository documentUserRepository) {
+        return new DocumentAuthenticationManager(passwordEncoder, new DocumentUserDetailsService(documentUserRepository));
+    }
+
+    @Bean
+    public AnonymousAuthenticationManager anonymousAuthenticationManager(AnonymousPasswordEncoder passwordEncoder) {
+        return new AnonymousAuthenticationManager(passwordEncoder, new AnonymousUserDetailsService());
     }
 
     @Bean
     @Primary
-    public MainPasswordEncoder mainPasswordEncoder() {
-        return new MainPasswordEncoder();
+    public JwtPasswordEncoder jwtPasswordEncoder() {
+        return new JwtPasswordEncoder();
     }
 
     @Bean
     public DocumentPasswordEncoder documentPasswordEncoder() {
         return new DocumentPasswordEncoder();
+    }
+
+    @Bean
+    public AnonymousPasswordEncoder anonymousPasswordEncoder() {
+        return new AnonymousPasswordEncoder();
     }
 }

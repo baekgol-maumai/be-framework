@@ -3,11 +3,11 @@ package ai.maum.beframework.conf.security.encoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * 주요 비밀번호 인코더
+ * JWT 사용자 비밀번호 인코더
  * @author baekgol@maum.ai
  */
-public class MainPasswordEncoder implements PasswordEncoder {
-    public MainPasswordEncoder() {}
+public class JwtPasswordEncoder implements PasswordEncoder {
+    public JwtPasswordEncoder() {}
 
     @Override
     public String encode(CharSequence rawPassword) {

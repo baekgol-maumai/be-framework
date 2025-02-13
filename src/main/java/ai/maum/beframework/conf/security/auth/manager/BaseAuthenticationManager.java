@@ -8,10 +8,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * 기본 사용자 인증 매니저
  * @author baekgol@maum.ai
  */
-public class BaseUserDetailsAuthenticationManager extends UserDetailsRepositoryReactiveAuthenticationManager {
+public class BaseAuthenticationManager extends UserDetailsRepositoryReactiveAuthenticationManager {
     protected final PasswordEncoder passwordEncoder;
 
-    public BaseUserDetailsAuthenticationManager(PasswordEncoder passwordEncoder, ReactiveUserDetailsService userDetailsService) {
+    public BaseAuthenticationManager(PasswordEncoder passwordEncoder, ReactiveUserDetailsService userDetailsService) {
         super(userDetailsService);
         this.passwordEncoder = passwordEncoder;
     }

@@ -1,6 +1,7 @@
 package ai.maum.beframework.conf.security.auth.userdetails;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,5 +17,6 @@ import java.util.Collection;
 public class BaseUserDetails implements UserDetails {
     protected String username;
     protected String password;
+    @Setter
     protected Collection<? extends GrantedAuthority> authorities;
 }
