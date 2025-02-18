@@ -3,6 +3,7 @@ package ai.maum.beframework.vo.meta.task;
 import ai.maum.beframework.util.StringUtil;
 import ai.maum.beframework.vo.meta.Message;
 import ai.maum.beframework.vo.meta.task.chat.ChatType;
+import ai.maum.beframework.vo.meta.task.chatbot.ChatbotType;
 import ai.maum.beframework.vo.meta.task.engine.EngineType;
 import ai.maum.beframework.vo.meta.task.engine.llm.LlmMultiTurnPrompt;
 import ai.maum.beframework.vo.meta.task.engine.llm.LlmPrompt;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  * 작업 요청 메시지
  * @author baekgol@maum.ai
- * @version 1.0.0
+ * @version 1.0.1
  */
 public record TaskRequestMessage(Input<?> input,
                                  List<TaskInfo> tasks,
@@ -271,16 +272,27 @@ public record TaskRequestMessage(Input<?> input,
         }
 
         public record ChatbotParam(
+                ChatbotType type,
                 String host,
                 ChatbotConfig config
         ) implements Param {
             public interface ChatbotInput<T> extends Input<T> {}
             public interface ChatbotConfig extends Config {}
 
-            public record CommonChatbotInput(String value) implements ChatbotInput<String> {
+            public record FastAiChatbotInput(String value) implements ChatbotInput<String> {
             }
 
-            public record CommonChatbotConfig() implements ChatbotConfig {
+            public record ScenarioChatbotInput(String value) implements ChatbotInput<String> {
+            }
+
+            public record FastAiChatbotConfig() implements ChatbotConfig {
+                @Override
+                public String toString() {
+                    return "없음";
+                }
+            }
+
+            public record ScenarioChatbotConfig() implements ChatbotConfig {
                 @Override
                 public String toString() {
                     return "없음";
@@ -289,7 +301,9 @@ public record TaskRequestMessage(Input<?> input,
 
             @Override
             public String toString() {
-                return "호스트: "
+                return "유형: "
+                        + type
+                        + ", 호스트: "
                         + host
                         + ", 설정: "
                         + config;

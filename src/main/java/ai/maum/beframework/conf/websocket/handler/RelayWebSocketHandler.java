@@ -60,7 +60,7 @@ import java.util.function.Consumer;
 /**
  * 중계 웹 소켓 핸들러
  * @author baekgol@maum.ai
- * @version 1.0.0
+ * @version 1.0.1
  */
 @Slf4j
 public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
@@ -274,7 +274,9 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                         case NOTICE -> ((TaskRequestMessage.TaskInfo.ChatParam.NoticeChatInput)trm.input()).value(); }; }
                                 case CHATBOT -> {
                                     final TaskRequestMessage.TaskInfo.ChatbotParam cbp = (TaskRequestMessage.TaskInfo.ChatbotParam)firstTask.param();
-                                    yield ((TaskRequestMessage.TaskInfo.ChatbotParam.CommonChatbotInput)trm.input()).value(); }
+                                    yield switch(cbp.type()) {
+                                        case FAST_AI -> ((TaskRequestMessage.TaskInfo.ChatbotParam.FastAiChatbotInput)trm.input()).value();
+                                        case SCENARIO -> ((TaskRequestMessage.TaskInfo.ChatbotParam.ScenarioChatbotInput)trm.input()).value(); }; }
                                 case RAG -> {
                                     final TaskRequestMessage.TaskInfo.RagParam rp = (TaskRequestMessage.TaskInfo.RagParam)firstTask.param();
                                     yield ((TaskRequestMessage.TaskInfo.RagParam.CommonRagInput)trm.input()).value(); }})
@@ -333,7 +335,6 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                             yield new JSONObject(); } })); }
                                         case CHATBOT -> {
                                             final TaskRequestMessage.TaskInfo.ChatbotParam cbp = (TaskRequestMessage.TaskInfo.ChatbotParam)task.param();
-                                            final TaskRequestMessage.TaskInfo.ChatbotParam.CommonChatbotConfig ccbc = (TaskRequestMessage.TaskInfo.ChatbotParam.CommonChatbotConfig)cbp.config();
                                             yield new JSONObject(Map.of(
                                                     "host", cbp.host(),
                                                     "config", new JSONObject())); }
