@@ -73,7 +73,6 @@ public record TaskRequestMessage(Input<?> input,
             }
 
             public record LlmEngineConfig(
-                    Integer topK,
                     Float topP,
                     Float temperature,
                     Float presencePenalty,
@@ -85,13 +84,7 @@ public record TaskRequestMessage(Input<?> input,
                     String result = "";
                     boolean isFirst = true;
 
-                    if(topK != null) {
-                        result += ("Top K: " + topK);
-                        isFirst = false;
-                    }
-
                     if(topP != null) {
-                        if(!isFirst) result += ", ";
                         result += ("Top P: " + topP);
                         isFirst = false;
                     }

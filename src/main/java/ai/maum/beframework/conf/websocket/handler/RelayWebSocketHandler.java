@@ -60,7 +60,7 @@ import java.util.function.Consumer;
 /**
  * 중계 웹 소켓 핸들러
  * @author baekgol@maum.ai
- * @version 1.0.1
+ * @version 1.0.2
  */
 @Slf4j
 public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
@@ -296,7 +296,6 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                         case LLM -> {
                                                             final TaskRequestMessage.TaskInfo.EngineParam.LlmEngineConfig lec = (TaskRequestMessage.TaskInfo.EngineParam.LlmEngineConfig)ep.config();
                                                             yield new JSONObject(Map.of(
-                                                                    "top_k", lec.topK(),
                                                                     "top_p", lec.topP(),
                                                                     "temperature", lec.temperature(),
                                                                     "presence_penalty", lec.presencePenalty(),
