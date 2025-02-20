@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * 작업 요청 메시지
  * @author baekgol@maum.ai
- * @version 1.0.1
+ * @version 1.0.2
  */
 public record TaskRequestMessage(Input<?> input,
                                  List<TaskInfo> tasks,
@@ -285,10 +285,12 @@ public record TaskRequestMessage(Input<?> input,
                 }
             }
 
-            public record ScenarioChatbotConfig() implements ChatbotConfig {
+            public record ScenarioChatbotConfig(
+                    String lang
+            ) implements ChatbotConfig {
                 @Override
                 public String toString() {
-                    return "없음";
+                    return "언어: " + lang;
                 }
             }
 
