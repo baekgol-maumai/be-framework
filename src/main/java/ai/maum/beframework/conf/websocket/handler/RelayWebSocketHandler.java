@@ -3,6 +3,7 @@ package ai.maum.beframework.conf.websocket.handler;
 import ai.maum.beframework.codemessage.SystemCodeMsg;
 import ai.maum.beframework.codemessage.WebSocketCodeMsg;
 import ai.maum.beframework.conf.websocket.WebSocketClientContext;
+import ai.maum.beframework.util.ParsingUtil;
 import ai.maum.beframework.vo.BaseException;
 import ai.maum.beframework.vo.LogLevel;
 import ai.maum.beframework.vo.meta.Content;
@@ -12,7 +13,9 @@ import ai.maum.beframework.vo.meta.task.TaskMessageDelegatorInfo;
 import ai.maum.beframework.vo.meta.task.TaskRequestMessage;
 import ai.maum.beframework.vo.meta.task.TaskType;
 import ai.maum.beframework.vo.meta.task.chat.ChatType;
+import ai.maum.beframework.vo.meta.task.chatbot.ChatbotType;
 import ai.maum.beframework.vo.meta.task.engine.EngineType;
+import ai.maum.beframework.vo.meta.task.vad.VadType;
 import ai.maum.beframework.vo.meta.type.ContentType;
 import ai.maum.beframework.vo.meta.type.DataType;
 import ai.maum.beframework.vo.meta.type.ResponseType;
@@ -32,6 +35,7 @@ import ai.maum.beframework.vo.meta.websocket.message.RoomMessageDelegator;
 import ai.maum.beframework.vo.meta.websocket.message.RoomMessageDelegatorInfo;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.listener.DataListener;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.client.SocketOptionBuilder;
@@ -60,7 +64,7 @@ import java.util.function.Consumer;
 /**
  * 중계 웹 소켓 핸들러
  * @author baekgol@maum.ai
- * @version 1.0.2
+ * @version 1.0.3
  */
 @Slf4j
 public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
@@ -174,8 +178,9 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                     case CHAT -> new TaskMessageDelegatorInfo.ChatDetail(ChatType.valueOf(detailNode.getString("type")));
                                                     case CHATBOT -> !detailNode.isNull("type")
                                                             ? new TaskMessageDelegatorInfo.EngineDetail(EngineType.LLM, detailNode.getString("model"))
-                                                            : new TaskMessageDelegatorInfo.ChatbotDetail(detailNode.getString("host"));
+                                                            : new TaskMessageDelegatorInfo.ChatbotDetail(ChatbotType.valueOf(detailNode.getString("type")), detailNode.getString("host"));
                                                     case RAG -> new TaskMessageDelegatorInfo.RagDetail();
+                                                    case VAD -> new TaskMessageDelegatorInfo.VadDetail(VadType.valueOf(detailNode.getString("type")), detailNode.getString("target"));
                                                 })
                                                 .build();
                                     } catch(JSONException e) {
@@ -202,7 +207,17 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                         return Content.builder()
                                                 .type(ContentType.of(dataType))
                                                 .data(switch(dataType) {
-                                                    case TextType textType -> contentNode.getString("data");
+                                                    case TextType textType -> switch(textType) {
+                                                        case PLAIN -> contentNode.getString("data");
+                                                        case JSON -> Optional.ofNullable(contentNode.getString("data"))
+                                                                .map(data -> {
+                                                                    try {
+                                                                        return ParsingUtil.convertToObjectByJsonString(data, Object.class);
+                                                                    } catch(JsonProcessingException e) {
+                                                                        throw BaseException.of(SystemCodeMsg.CONVERT_FAILURE);
+                                                                    }
+                                                                })
+                                                                .orElseThrow(() -> BaseException.of(SystemCodeMsg.CONVERT_FAILURE)); };
                                                     case BinaryType binaryType -> switch(binaryType) {
                                                         case AudioType audioType -> contentNode.getString("data");
                                                         case DocumentType documentType -> contentNode.getString("data");
@@ -279,7 +294,11 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                         case SCENARIO -> ((TaskRequestMessage.TaskInfo.ChatbotParam.ScenarioChatbotInput)trm.input()).value(); }; }
                                 case RAG -> {
                                     final TaskRequestMessage.TaskInfo.RagParam rp = (TaskRequestMessage.TaskInfo.RagParam)firstTask.param();
-                                    yield ((TaskRequestMessage.TaskInfo.RagParam.CommonRagInput)trm.input()).value(); }})
+                                    yield ((TaskRequestMessage.TaskInfo.RagParam.CommonRagInput)trm.input()).value(); }
+                                case VAD -> {
+                                    final TaskRequestMessage.TaskInfo.VadParam vadp = (TaskRequestMessage.TaskInfo.VadParam)firstTask.param();
+                                    yield switch(vadp.type()) {
+                                        case STT -> ((TaskRequestMessage.TaskInfo.VadParam.SttVadInput)trm.input()).value(); }; } })
                             .orElseThrow(() -> BaseException.of(SystemCodeMsg.CONVERT_FAILURE)),
                     "tasks", new JSONArray(trm.tasks()
                             .stream()
@@ -346,8 +365,19 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                     "temperature", crc.temperature(),
                                                     "presence_penalty", crc.presencePenalty(),
                                                     "frequency_penalty", crc.frequencyPenalty(),
-                                                    "beam_width", crc.beamWidth()));
-                                        }})))
+                                                    "beam_width", crc.beamWidth())); }
+                                        case VAD -> {
+                                            final TaskRequestMessage.TaskInfo.VadParam vadp = (TaskRequestMessage.TaskInfo.VadParam)task.param();
+                                            yield switch(vadp.type()) {
+                                                case STT -> {
+                                                    final TaskRequestMessage.TaskInfo.VadParam.SttVadConfig svadc = (TaskRequestMessage.TaskInfo.VadParam.SttVadConfig)vadp.config();
+                                                    yield new JSONObject(Map.of(
+                                                            "threshold", new JSONObject(Map.of(
+                                                                    "start", svadc.threshold().start(),
+                                                                    "end", svadc.threshold().end())),
+                                                            "sample_rate", svadc.sampleRate(),
+                                                            "min_speech_duration", svadc.minSpeechDuration(),
+                                                            "speech_pad", svadc.speechPad())); } }; } })))
                             .toList()),
                     "send_last_only", trm.sendLastOnly()));
         else if(message instanceof RoomMessageDelegator<?> rmd)

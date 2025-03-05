@@ -7,6 +7,7 @@ import ai.maum.beframework.vo.meta.task.chatbot.ChatbotType;
 import ai.maum.beframework.vo.meta.task.engine.EngineType;
 import ai.maum.beframework.vo.meta.task.engine.llm.LlmMultiTurnPrompt;
 import ai.maum.beframework.vo.meta.task.engine.llm.LlmPrompt;
+import ai.maum.beframework.vo.meta.task.vad.VadType;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import org.bson.types.ObjectId;
 
@@ -15,7 +16,7 @@ import java.util.List;
 /**
  * 작업 요청 메시지
  * @author baekgol@maum.ai
- * @version 1.0.2
+ * @version 1.0.3
  */
 public record TaskRequestMessage(Input<?> input,
                                  List<TaskInfo> tasks,
@@ -361,6 +362,80 @@ public record TaskRequestMessage(Input<?> input,
                     if(beamWidth != null) {
                         if(!isFirst) result += ", ";
                         result += ("Beam Width: " + beamWidth);
+                    }
+
+                    return result;
+                }
+            }
+
+            @Override
+            public String toString() {
+                return "설정: " + config;
+            }
+        }
+
+        public record VadParam(
+                VadType type,
+                String target,
+                VadConfig config
+        ) implements Param {
+            public interface VadInput<T> extends Input<T> {
+            }
+
+            public interface VadConfig extends Config {
+            }
+
+            public record SttVadInput(String value) implements VadInput<String> {
+                @Override
+                public String toString() {
+                    return StringUtil.abbreviate(value);
+                }
+            }
+
+            public record SttVadConfig(
+                    Threshold threshold,
+                    Integer sampleRate,
+                    Integer minSpeechDuration,
+                    Integer speechPad
+            ) implements VadConfig {
+                public record Threshold(
+                        Float start,
+                        Float end
+                ) {
+                    @Override
+                    public String toString() {
+                        return "시작: "
+                                + start
+                                + ", 종료: "
+                                + end;
+                    }
+                }
+
+                @Override
+                public String toString() {
+                    String result = "";
+                    boolean isFirst = true;
+
+                    if(threshold != null) {
+                        result += ("임계값: " + threshold);
+                        isFirst = false;
+                    }
+
+                    if(sampleRate != null) {
+                        if(!isFirst) result += ", ";
+                        result += ("샘플레이트: " + sampleRate);
+                        isFirst = false;
+                    }
+
+                    if(minSpeechDuration != null) {
+                        if(!isFirst) result += ", ";
+                        result += ("최소 음성 지속 시간: " + minSpeechDuration);
+                        isFirst = false;
+                    }
+
+                    if(speechPad != null) {
+                        if(!isFirst) result += ", ";
+                        result += ("음성 패딩 시간: " + speechPad);
                     }
 
                     return result;

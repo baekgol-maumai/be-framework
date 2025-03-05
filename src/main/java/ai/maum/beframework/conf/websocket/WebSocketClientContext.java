@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * 웹 소켓 클라이언트 컨텍스트
+ * @author baekgol@maum.ai
+ */
 public class WebSocketClientContext {
     private static final ThreadLocal<SocketIOClient> holder = new ThreadLocal<>();
     private static final ConcurrentMap<String, SocketIOClient> store = new ConcurrentHashMap<>();

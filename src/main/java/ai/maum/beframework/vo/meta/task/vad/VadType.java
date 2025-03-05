@@ -1,4 +1,4 @@
-package ai.maum.beframework.vo.meta.task;
+package ai.maum.beframework.vo.meta.task.vad;
 
 import ai.maum.beframework.codemessage.SystemCodeMsg;
 import ai.maum.beframework.vo.BaseException;
@@ -9,22 +9,18 @@ import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
 
 /**
- * 작업 유형
+ * VAD 유형
  * @author baekgol@maum.ai
  */
 @Getter
 @RequiredArgsConstructor
-public enum TaskType implements Type {
-    ENGINE("엔진"),
-    CHAT("대화"),
-    CHATBOT("챗봇"),
-    RAG("RAG"),
-    VAD("VAD");
+public enum VadType implements Type {
+    STT("STT");
 
     private final String name;
 
-    public static TaskType from(String value) {
-        return Arrays.stream(TaskType.values())
+    public static VadType from(String value) {
+        return Arrays.stream(VadType.values())
                 .filter(v -> v.name().equals(value))
                 .findAny()
                 .orElseThrow(() -> BaseException.of(SystemCodeMsg.PARAM_WRONG));

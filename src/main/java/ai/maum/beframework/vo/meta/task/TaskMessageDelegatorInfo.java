@@ -3,7 +3,9 @@ package ai.maum.beframework.vo.meta.task;
 import ai.maum.beframework.conf.serialization.deserializer.ObjectIdDeserializer;
 import ai.maum.beframework.conf.serialization.serializer.ObjectIdSerializer;
 import ai.maum.beframework.vo.meta.task.chat.ChatType;
+import ai.maum.beframework.vo.meta.task.chatbot.ChatbotType;
 import ai.maum.beframework.vo.meta.task.engine.EngineType;
+import ai.maum.beframework.vo.meta.task.vad.VadType;
 import ai.maum.beframework.vo.meta.websocket.message.RoomMessageDelegatorInfo;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,7 +20,7 @@ import org.bson.types.ObjectId;
 /**
  * 작업 메시지 전달자 정보
  * @author baekgol@maum.ai
- * @version 1.0.0
+ * @version 1.0.1
  */
 @Getter
 @SuperBuilder
@@ -47,11 +49,18 @@ public class TaskMessageDelegatorInfo extends RoomMessageDelegatorInfo {
     }
 
     public record ChatbotDetail(
+            ChatbotType type,
             String host
     ) implements Detail {
     }
 
     public record RagDetail(
+    ) implements Detail {
+    }
+
+    public record VadDetail(
+            VadType type,
+            String target
     ) implements Detail {
     }
 
@@ -68,7 +77,10 @@ public class TaskMessageDelegatorInfo extends RoomMessageDelegatorInfo {
             case ENGINE ->
                     new EngineDetail(EngineType.from(detailNode.get("type").asText()), detailNode.get("model").asText());
             case CHAT -> new ChatDetail(ChatType.from(detailNode.get("type").asText()));
-            case CHATBOT -> new ChatbotDetail(detailNode.get("host").asText());
-            case RAG -> new RagDetail(); };
+            case CHATBOT -> detailNode.get("model") != null
+                    ? new EngineDetail(EngineType.LLM, detailNode.get("model").asText())
+                    : new ChatbotDetail(ChatbotType.from(detailNode.get("type").asText()), detailNode.get("host").asText());
+            case RAG -> new RagDetail();
+            case VAD -> new VadDetail(VadType.from(detailNode.get("type").asText()), detailNode.get("target").asText()); };
     }
 }

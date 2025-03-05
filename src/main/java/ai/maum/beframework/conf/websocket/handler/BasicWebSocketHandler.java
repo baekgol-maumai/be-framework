@@ -16,6 +16,7 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
+import com.corundumstudio.socketio.listener.MultiTypeEventListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
 
@@ -222,6 +223,10 @@ public abstract class BasicWebSocketHandler extends WebSocketHandler {
 
     protected <T> void addEventListener(Event event, Class<T> clazz, DataListener<T> listener) {
         namespace.addEventListener(event, clazz, listener);
+    }
+
+    protected void addEventListener(Event event, MultiTypeEventListener listener, Class<?>... classes) {
+        namespace.addEventListener(event, listener, classes);
     }
 
     protected boolean isBypass(SocketIOClient client) {

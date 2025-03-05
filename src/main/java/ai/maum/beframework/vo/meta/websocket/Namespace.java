@@ -5,6 +5,7 @@ import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
+import com.corundumstudio.socketio.listener.MultiTypeEventListener;
 import lombok.Getter;
 
 /**
@@ -35,5 +36,9 @@ public class Namespace {
 
     public <T> void addEventListener(Event event, Class<T> clazz, DataListener<T> listener) {
         core.addEventListener(event.getCode(), clazz, listener);
+    }
+
+    public void addEventListener(Event event, MultiTypeEventListener listener, Class<?>... classes) {
+        core.addMultiTypeEventListener(event.getCode(), listener, classes);
     }
 }
