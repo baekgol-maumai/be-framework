@@ -375,7 +375,6 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                             "threshold", new JSONObject(Map.of(
                                                                     "start", svadc.threshold().start(),
                                                                     "end", svadc.threshold().end())),
-                                                            "sample_rate", svadc.sampleRate(),
                                                             "min_speech_duration", svadc.minSpeechDuration(),
                                                             "speech_pad", svadc.speechPad())); } }; } })))
                             .toList()),

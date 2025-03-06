@@ -394,7 +394,6 @@ public record TaskRequestMessage(Input<?> input,
 
             public record SttVadConfig(
                     Threshold threshold,
-                    Integer sampleRate,
                     Integer minSpeechDuration,
                     Integer speechPad
             ) implements VadConfig {
@@ -418,12 +417,6 @@ public record TaskRequestMessage(Input<?> input,
 
                     if(threshold != null) {
                         result += ("임계값: " + threshold);
-                        isFirst = false;
-                    }
-
-                    if(sampleRate != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("샘플레이트: " + sampleRate);
                         isFirst = false;
                     }
 
