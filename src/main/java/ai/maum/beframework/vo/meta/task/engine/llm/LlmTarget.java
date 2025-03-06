@@ -1,4 +1,4 @@
-package ai.maum.beframework.vo.meta.task.rag;
+package ai.maum.beframework.vo.meta.task.engine.llm;
 
 import ai.maum.beframework.codemessage.SystemCodeMsg;
 import ai.maum.beframework.vo.BaseException;
