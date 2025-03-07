@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * 작업 요청 메시지
  * @author baekgol@maum.ai
- * @version 1.0.3
+ * @version 1.0.4
  */
 public record TaskRequestMessage(Input<?> input,
                                  List<TaskInfo> tasks,
@@ -204,10 +204,12 @@ public record TaskRequestMessage(Input<?> input,
                 }
             }
 
-            public record SttEngineConfig() implements EngineConfig {
+            public record SttEngineConfig(
+                    String lang
+            ) implements EngineConfig {
                 @Override
                 public String toString() {
-                    return "없음";
+                    return lang == null ? "없음" : ("Lang: " + lang);
                 }
             }
 
@@ -395,7 +397,8 @@ public record TaskRequestMessage(Input<?> input,
             public record SttVadConfig(
                     Threshold threshold,
                     Integer minSpeechDuration,
-                    Integer speechPad
+                    Integer speechPad,
+                    String lang
             ) implements VadConfig {
                 public record Threshold(
                         Float start,
@@ -429,6 +432,11 @@ public record TaskRequestMessage(Input<?> input,
                     if(speechPad != null) {
                         if(!isFirst) result += ", ";
                         result += ("음성 패딩 시간: " + speechPad);
+                    }
+
+                    if(lang != null) {
+                        if(!isFirst) result += ", ";
+                        result += ("언어: " + lang);
                     }
 
                     return result;
