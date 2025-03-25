@@ -176,7 +176,7 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                             EngineType.valueOf(detailNode.getString("type")),
                                                             detailNode.getString("model"));
                                                     case CHAT -> new TaskMessageDelegatorInfo.ChatDetail(ChatType.valueOf(detailNode.getString("type")));
-                                                    case CHATBOT -> !detailNode.isNull("type")
+                                                    case CHATBOT -> !detailNode.isNull("model")
                                                             ? new TaskMessageDelegatorInfo.EngineDetail(EngineType.LLM, detailNode.getString("model"))
                                                             : new TaskMessageDelegatorInfo.ChatbotDetail(ChatbotType.valueOf(detailNode.getString("type")), detailNode.getString("host"));
                                                     case RAG -> new TaskMessageDelegatorInfo.RagDetail();
