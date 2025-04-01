@@ -16,7 +16,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum LlmTarget implements Type {
     ORCHESTRA("오케스트라"),
-    LANGCHAIN("LangChain");
+    OLLAMA("Ollama");
 
     private final String name;
 
