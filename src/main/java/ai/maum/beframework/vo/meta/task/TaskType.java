@@ -19,7 +19,8 @@ public enum TaskType implements Type {
     CHAT("대화"),
     CHATBOT("챗봇"),
     RAG("RAG"),
-    VAD("VAD");
+    VAD("VAD"),
+    AGENT("에이전트");
 
     private final String name;
 

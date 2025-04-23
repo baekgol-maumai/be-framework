@@ -64,7 +64,7 @@ import java.util.function.Consumer;
 /**
  * 중계 웹 소켓 핸들러
  * @author baekgol@maum.ai
- * @version 1.0.3
+ * @version 1.0.4
  */
 @Slf4j
 public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
@@ -181,6 +181,7 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                             : new TaskMessageDelegatorInfo.ChatbotDetail(ChatbotType.valueOf(detailNode.getString("type")), detailNode.getString("host"));
                                                     case RAG -> new TaskMessageDelegatorInfo.RagDetail();
                                                     case VAD -> new TaskMessageDelegatorInfo.VadDetail(VadType.valueOf(detailNode.getString("type")), detailNode.getString("target"));
+                                                    case AGENT -> new TaskMessageDelegatorInfo.AgentDetail(detailNode.getString("model"));
                                                 })
                                                 .build();
                                     } catch(JSONException e) {
@@ -298,7 +299,10 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                 case VAD -> {
                                     final TaskRequestMessage.TaskInfo.VadParam vadp = (TaskRequestMessage.TaskInfo.VadParam)firstTask.param();
                                     yield switch(vadp.type()) {
-                                        case STT -> ((TaskRequestMessage.TaskInfo.VadParam.SttVadInput)trm.input()).value(); }; } })
+                                        case STT -> ((TaskRequestMessage.TaskInfo.VadParam.SttVadInput)trm.input()).value(); }; }
+                                case AGENT -> {
+                                    final TaskRequestMessage.TaskInfo.AgentParam agp = (TaskRequestMessage.TaskInfo.AgentParam)firstTask.param();
+                                    yield ((TaskRequestMessage.TaskInfo.AgentParam.CommonAgentInput)trm.input()).value(); } })
                             .orElseThrow(() -> BaseException.of(SystemCodeMsg.CONVERT_FAILURE)),
                     "tasks", new JSONArray(trm.tasks()
                             .stream()
@@ -376,7 +380,27 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                                     "start", svadc.threshold().start(),
                                                                     "end", svadc.threshold().end())),
                                                             "min_speech_duration", svadc.minSpeechDuration(),
-                                                            "speech_pad", svadc.speechPad())); } }; } })))
+                                                            "speech_pad", svadc.speechPad())); } }; }
+                                        case AGENT -> {
+                                            final TaskRequestMessage.TaskInfo.AgentParam agp = (TaskRequestMessage.TaskInfo.AgentParam)task.param();
+                                            final TaskRequestMessage.TaskInfo.AgentParam.CommonAgentConfig cagc = (TaskRequestMessage.TaskInfo.AgentParam.CommonAgentConfig)agp.config();
+                                            yield new JSONObject(Map.of(
+                                                    "model", agp.model(),
+                                                    "conversation_id", agp.conversationId(),
+                                                    "tools", new JSONArray(agp.tools()
+                                                            .stream()
+                                                            .map(tool -> new JSONObject(Map.of(
+                                                                    "execute_target", tool.executeTarget(),
+                                                                    "name", tool.name(),
+                                                                    "args", new JSONArray(tool.args()),
+                                                                    "envs", new JSONObject(tool.envs()))))
+                                                            .toList()),
+                                                    "config", new JSONObject(Map.of(
+                                                            "top_p", cagc.topP(),
+                                                            "temperature", cagc.temperature(),
+                                                            "presence_penalty", cagc.presencePenalty(),
+                                                            "frequency_penalty", cagc.frequencyPenalty(),
+                                                            "beam_width", cagc.beamWidth())))); } })))
                             .toList()),
                     "send_last_only", trm.sendLastOnly()));
         else if(message instanceof RoomMessageDelegator<?> rmd)

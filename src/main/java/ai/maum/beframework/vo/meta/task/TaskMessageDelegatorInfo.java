@@ -20,7 +20,7 @@ import org.bson.types.ObjectId;
 /**
  * 작업 메시지 전달자 정보
  * @author baekgol@maum.ai
- * @version 1.0.1
+ * @version 1.0.2
  */
 @Getter
 @SuperBuilder
@@ -64,6 +64,11 @@ public class TaskMessageDelegatorInfo extends RoomMessageDelegatorInfo {
     ) implements Detail {
     }
 
+    public record AgentDetail(
+            String model
+    ) implements Detail {
+    }
+
     @JsonCreator
     public TaskMessageDelegatorInfo(
             @JsonProperty("task_id") ObjectId taskId,
@@ -81,6 +86,7 @@ public class TaskMessageDelegatorInfo extends RoomMessageDelegatorInfo {
                     ? new EngineDetail(EngineType.LLM, detailNode.get("model").asText())
                     : new ChatbotDetail(ChatbotType.from(detailNode.get("type").asText()), detailNode.get("host").asText());
             case RAG -> new RagDetail();
-            case VAD -> new VadDetail(VadType.from(detailNode.get("type").asText()), detailNode.get("target").asText()); };
+            case VAD -> new VadDetail(VadType.from(detailNode.get("type").asText()), detailNode.get("target").asText());
+            case AGENT -> new AgentDetail(detailNode.get("model").asText()); };
     }
 }

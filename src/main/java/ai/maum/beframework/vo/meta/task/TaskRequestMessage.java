@@ -1,7 +1,7 @@
 package ai.maum.beframework.vo.meta.task;
 
-import ai.maum.beframework.util.StringUtil;
 import ai.maum.beframework.vo.meta.Message;
+import ai.maum.beframework.vo.meta.task.agent.AgentTool;
 import ai.maum.beframework.vo.meta.task.chat.ChatType;
 import ai.maum.beframework.vo.meta.task.chatbot.ChatbotType;
 import ai.maum.beframework.vo.meta.task.engine.EngineType;
@@ -9,6 +9,7 @@ import ai.maum.beframework.vo.meta.task.engine.llm.LlmMultiTurnPrompt;
 import ai.maum.beframework.vo.meta.task.engine.llm.LlmPrompt;
 import ai.maum.beframework.vo.meta.task.vad.VadType;
 import com.fasterxml.jackson.annotation.JsonAlias;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.bson.types.ObjectId;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 /**
  * 작업 요청 메시지
  * @author baekgol@maum.ai
- * @version 1.0.4
+ * @version 1.0.5
  */
 public record TaskRequestMessage(Input<?> input,
                                  List<TaskInfo> tasks,
@@ -26,8 +27,11 @@ public record TaskRequestMessage(Input<?> input,
     }
 
     public record TaskInfo(
+            @Schema(name = "trace_id", title = "추적 ID", example = "f2b57164-eeae-430a-94e7-251b287046d5")
             String traceId,
+            @Schema(title = "작업 유형", example = "ENGINE")
             TaskType type,
+            @Schema(title = "작업 파라미터")
             Param param
     ) {
         public interface Param {
@@ -45,32 +49,16 @@ public record TaskRequestMessage(Input<?> input,
             public interface EngineInput<T> extends Input<T> {}
             public interface EngineConfig extends Config {}
 
-            public record LlmEngineInput(String value) implements EngineInput<String> {
-                @Override
-                public String toString() {
-                    return value;
-                }
+            public record LlmEngineInput(String value) implements EngineParam.EngineInput<String> {
             }
 
-            public record TtsEngineInput(String value) implements EngineInput<String> {
-                @Override
-                public String toString() {
-                    return StringUtil.abbreviate(value);
-                }
+            public record TtsEngineInput(String value) implements EngineParam.EngineInput<String> {
             }
 
-            public record SttEngineInput(String value) implements EngineInput<String> {
-                @Override
-                public String toString() {
-                    return StringUtil.abbreviate(value);
-                }
+            public record SttEngineInput(String value) implements EngineParam.EngineInput<String> {
             }
 
-            public record StfEngineInput(String value) implements EngineInput<String> {
-                @Override
-                public String toString() {
-                    return StringUtil.abbreviate(value);
-                }
+            public record StfEngineInput(String value) implements EngineParam.EngineInput<String> {
             }
 
             public record LlmEngineConfig(
@@ -80,41 +68,6 @@ public record TaskRequestMessage(Input<?> input,
                     Float frequencyPenalty,
                     Integer beamWidth
             ) implements EngineConfig {
-                @Override
-                public String toString() {
-                    String result = "";
-                    boolean isFirst = true;
-
-                    if(topP != null) {
-                        result += ("Top P: " + topP);
-                        isFirst = false;
-                    }
-
-                    if(temperature != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Temperature: " + temperature);
-                        isFirst = false;
-                    }
-
-                    if(presencePenalty != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Presence Penalty: " + presencePenalty);
-                        isFirst = false;
-                    }
-
-                    if(frequencyPenalty != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Frequency Penalty: " + frequencyPenalty);
-                        isFirst = false;
-                    }
-
-                    if(beamWidth != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Beam Width: " + beamWidth);
-                    }
-
-                    return result;
-                }
             }
 
             public record TtsEngineConfig(
@@ -132,102 +85,16 @@ public record TaskRequestMessage(Input<?> input,
                     @JsonAlias("speakerName")
                     String speakerName
             ) implements EngineConfig {
-                @Override
-                public String toString() {
-                    String result = "";
-                    boolean isFirst = true;
-
-                    if(lang != null) {
-                        result += ("Lang: " + lang);
-                        isFirst = false;
-                    }
-
-                    if(sampleRate != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Sample Rate: " + sampleRate);
-                        isFirst = false;
-                    }
-
-                    if(speaker != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Speaker: " + speaker);
-                        isFirst = false;
-                    }
-
-                    if(audioEncoding != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Audio Encoding: " + audioEncoding);
-                        isFirst = false;
-                    }
-
-                    if(durationRate != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Duration Rate: " + durationRate);
-                        isFirst = false;
-                    }
-
-                    if(emotion != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Emotion: " + emotion);
-                        isFirst = false;
-                    }
-
-                    if(padding != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Padding: " + padding);
-                        isFirst = false;
-                    }
-
-                    if(profile != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Profile: " + profile);
-                        isFirst = false;
-                    }
-
-                    if(speakerName != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Speaker Name: " + speakerName);
-                    }
-
-                    return result;
-                }
-
                 public record Padding(Float begin, Float end) {
-                    @Override
-                    public String toString() {
-                        return "("
-                                + (begin == null ? "null" : begin)
-                                + ", "
-                                + (end == null ? "null" : end)
-                                + ")";
-                    }
                 }
             }
 
             public record SttEngineConfig(
                     String lang
             ) implements EngineConfig {
-                @Override
-                public String toString() {
-                    return lang == null ? "없음" : ("Lang: " + lang);
-                }
             }
 
             public record StfEngineConfig() implements EngineConfig {
-                @Override
-                public String toString() {
-                    return "없음";
-                }
-            }
-
-            @Override
-            public String toString() {
-                return "엔진 유형: "
-                        + type.getName()
-                        + ", 엔진 모델: "
-                        + model
-                        + ", 설정: "
-                        + config;
             }
         }
 
@@ -245,25 +112,9 @@ public record TaskRequestMessage(Input<?> input,
             }
 
             public record GeneralChatConfig() implements ChatConfig {
-                @Override
-                public String toString() {
-                    return "없음";
-                }
             }
 
             public record NoticeChatConfig() implements ChatConfig {
-                @Override
-                public String toString() {
-                    return "없음";
-                }
-            }
-
-            @Override
-            public String toString() {
-                return "대화 유형: "
-                        + type.getName()
-                        + ", 설정: "
-                        + config;
             }
         }
 
@@ -282,29 +133,11 @@ public record TaskRequestMessage(Input<?> input,
             }
 
             public record FastAiChatbotConfig() implements ChatbotConfig {
-                @Override
-                public String toString() {
-                    return "없음";
-                }
             }
 
             public record ScenarioChatbotConfig(
                     String lang
             ) implements ChatbotConfig {
-                @Override
-                public String toString() {
-                    return "언어: " + lang;
-                }
-            }
-
-            @Override
-            public String toString() {
-                return "유형: "
-                        + type
-                        + ", 호스트: "
-                        + host
-                        + ", 설정: "
-                        + config;
             }
         }
 
@@ -327,52 +160,6 @@ public record TaskRequestMessage(Input<?> input,
                     Float frequencyPenalty,
                     Integer beamWidth
             ) implements RagConfig {
-                @Override
-                public String toString() {
-                    String result = "";
-                    boolean isFirst = true;
-
-                    if(topK != null) {
-                        result += ("Top K: " + topK);
-                        isFirst = false;
-                    }
-
-                    if(topP != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Top P: " + topP);
-                        isFirst = false;
-                    }
-
-                    if(temperature != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Temperature: " + temperature);
-                        isFirst = false;
-                    }
-
-                    if(presencePenalty != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Presence Penalty: " + presencePenalty);
-                        isFirst = false;
-                    }
-
-                    if(frequencyPenalty != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Frequency Penalty: " + frequencyPenalty);
-                        isFirst = false;
-                    }
-
-                    if(beamWidth != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("Beam Width: " + beamWidth);
-                    }
-
-                    return result;
-                }
-            }
-
-            @Override
-            public String toString() {
-                return "설정: " + config;
             }
         }
 
@@ -388,10 +175,6 @@ public record TaskRequestMessage(Input<?> input,
             }
 
             public record SttVadInput(String value) implements VadInput<String> {
-                @Override
-                public String toString() {
-                    return StringUtil.abbreviate(value);
-                }
             }
 
             public record SttVadConfig(
@@ -404,84 +187,30 @@ public record TaskRequestMessage(Input<?> input,
                         Float start,
                         Float end
                 ) {
-                    @Override
-                    public String toString() {
-                        return "시작: "
-                                + start
-                                + ", 종료: "
-                                + end;
-                    }
-                }
-
-                @Override
-                public String toString() {
-                    String result = "";
-                    boolean isFirst = true;
-
-                    if(threshold != null) {
-                        result += ("임계값: " + threshold);
-                        isFirst = false;
-                    }
-
-                    if(minSpeechDuration != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("최소 음성 지속 시간: " + minSpeechDuration);
-                        isFirst = false;
-                    }
-
-                    if(speechPad != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("음성 패딩 시간: " + speechPad);
-                    }
-
-                    if(lang != null) {
-                        if(!isFirst) result += ", ";
-                        result += ("언어: " + lang);
-                    }
-
-                    return result;
                 }
             }
+        }
 
-            @Override
-            public String toString() {
-                return "설정: " + config;
+        public record AgentParam(
+                String model,
+                String conversationId,
+                List<AgentTool> tools,
+                AgentConfig config
+        ) implements Param {
+            public interface AgentInput<T> extends Input<T> {}
+            public interface AgentConfig extends Config {}
+
+            public record CommonAgentInput(String value) implements AgentInput<String> {
+            }
+
+            public record CommonAgentConfig(
+                    Float topP,
+                    Float temperature,
+                    Float presencePenalty,
+                    Float frequencyPenalty,
+                    Integer beamWidth
+            ) implements AgentConfig {
             }
         }
-
-        @Override
-        public String toString() {
-            return "\n[작업 유형]\n"
-                    + type.getName()
-                    + "[파라미터]\n"
-                    + param;
-        }
-    }
-
-    @Override
-    public String toString() {
-        final int taskSize = tasks.size();
-        final StringBuilder result = new StringBuilder("[입력값]\n"
-                + input
-                + "\n[작업 정보]\n");
-
-        result.append("호출 순서: (");
-
-        for(int i=0; i<taskSize; i++) {
-            result.append(tasks.get(i).type.getName());
-            if(i < taskSize - 1) result.append(" -> ");
-        }
-
-        result.append(")\n");
-
-        for(int i=0; i<taskSize; i++) {
-            result.append("(")
-                    .append(i + 1)
-                    .append("): ")
-                    .append(tasks.get(i));
-            if(i < taskSize - 1) result.append("\n");
-        }
-
-        return result.toString();
     }
 }
