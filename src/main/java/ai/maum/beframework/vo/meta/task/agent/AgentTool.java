@@ -11,6 +11,6 @@ public record AgentTool(
         String executeTarget,
         String name,
         List<String> args,
-        Map<String, String> envs
+        Map<String, String> env
 ) {
 }

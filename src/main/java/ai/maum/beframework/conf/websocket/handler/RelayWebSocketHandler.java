@@ -393,7 +393,7 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                                     "execute_target", tool.executeTarget(),
                                                                     "name", tool.name(),
                                                                     "args", new JSONArray(tool.args()),
-                                                                    "envs", new JSONObject(tool.envs()))))
+                                                                    "env", new JSONObject(tool.env()))))
                                                             .toList()),
                                                     "config", new JSONObject(Map.of(
                                                             "top_p", cagc.topP(),
