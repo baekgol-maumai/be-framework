@@ -172,7 +172,8 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                 .taskId(new ObjectId(taskId))
                                                 .taskType(taskType)
                                                 .result(infoNode.getBoolean("result"))
-                                                .errInfo(Optional.ofNullable(infoNode.getJSONObject("err_info"))
+                                                .errInfo(!infoNode.isNull("err_info")
+                                                        ? Optional.ofNullable(infoNode.getJSONObject("err_info"))
                                                         .map(errInfoNode -> new CodeMessage() {
                                                             @Override
                                                             public String getCode() {
@@ -192,7 +193,8 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                                 }
                                                             }
                                                         })
-                                                        .orElse(null))
+                                                        .orElse(null)
+                                                        : null)
                                                 .detail(switch(taskType) {
                                                     case ENGINE -> new TaskMessageDelegatorInfo.EngineDetail(
                                                             EngineType.valueOf(detailNode.getString("type")),
