@@ -1,6 +1,9 @@
 package ai.maum.beframework.vo.meta.task;
 
+import ai.maum.beframework.codemessage.CodeMessage;
+import ai.maum.beframework.conf.serialization.deserializer.CodeMessageDeserializer;
 import ai.maum.beframework.conf.serialization.deserializer.ObjectIdDeserializer;
+import ai.maum.beframework.conf.serialization.serializer.CodeMessageSerializer;
 import ai.maum.beframework.conf.serialization.serializer.ObjectIdSerializer;
 import ai.maum.beframework.vo.meta.task.chat.ChatType;
 import ai.maum.beframework.vo.meta.task.chatbot.ChatbotType;
@@ -20,7 +23,7 @@ import org.bson.types.ObjectId;
 /**
  * 작업 메시지 정보
  * @author baekgol@maum.ai
- * @version 1.0.2
+ * @version 1.0.3
  */
 @Getter
 @SuperBuilder
@@ -33,6 +36,10 @@ public class TaskMessageInfo extends RoomMessageInfo {
     @JsonProperty("task_type")
     private TaskType taskType;
     private boolean result;
+    @JsonProperty("err_info")
+    @JsonSerialize(using = CodeMessageSerializer.class)
+    @JsonDeserialize(using = CodeMessageDeserializer.class)
+    private CodeMessage errInfo;
     private Detail detail;
 
     public interface Detail {}

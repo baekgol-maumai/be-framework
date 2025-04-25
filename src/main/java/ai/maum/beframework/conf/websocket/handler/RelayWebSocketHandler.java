@@ -1,5 +1,6 @@
 package ai.maum.beframework.conf.websocket.handler;
 
+import ai.maum.beframework.codemessage.CodeMessage;
 import ai.maum.beframework.codemessage.SystemCodeMsg;
 import ai.maum.beframework.codemessage.WebSocketCodeMsg;
 import ai.maum.beframework.conf.websocket.WebSocketClientContext;
@@ -64,7 +65,7 @@ import java.util.function.Consumer;
 /**
  * 중계 웹 소켓 핸들러
  * @author baekgol@maum.ai
- * @version 1.0.4
+ * @version 1.0.5
  */
 @Slf4j
 public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
@@ -171,6 +172,27 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                 .taskId(new ObjectId(taskId))
                                                 .taskType(taskType)
                                                 .result(infoNode.getBoolean("result"))
+                                                .errInfo(Optional.ofNullable(infoNode.getJSONObject("err_info"))
+                                                        .map(errInfoNode -> new CodeMessage() {
+                                                            @Override
+                                                            public String getCode() {
+                                                                try {
+                                                                    return errInfoNode.getString("code");
+                                                                } catch(JSONException e) {
+                                                                    return null;
+                                                                }
+                                                            }
+
+                                                            @Override
+                                                            public String getMessage() {
+                                                                try {
+                                                                    return errInfoNode.getString("message");
+                                                                } catch(JSONException e) {
+                                                                    return SystemCodeMsg.FAILURE.getMessage();
+                                                                }
+                                                            }
+                                                        })
+                                                        .orElse(null))
                                                 .detail(switch(taskType) {
                                                     case ENGINE -> new TaskMessageDelegatorInfo.EngineDetail(
                                                             EngineType.valueOf(detailNode.getString("type")),
@@ -315,6 +337,13 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                             yield new JSONObject(Map.of(
                                                     "type", ep.type(),
                                                     "model", ep.model(),
+                                                    "conversation_id", ep.conversationId(),
+                                                    "prompts", new JSONArray(ep.prompts()
+                                                            .stream()
+                                                            .map(prompt -> new JSONObject(Map.of(
+                                                                    "role", prompt.getRole().getCode(),
+                                                                    "content", prompt.getContent())))
+                                                            .toList()),
                                                     "config", switch(ep.type()) {
                                                         case LLM -> {
                                                             final TaskRequestMessage.TaskInfo.EngineParam.LlmEngineConfig lec = (TaskRequestMessage.TaskInfo.EngineParam.LlmEngineConfig)ep.config();
@@ -340,7 +369,7 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                                                     "speaker_name", tec.speakerName())); }
                                                         case STT -> {
                                                             final TaskRequestMessage.TaskInfo.EngineParam.SttEngineConfig sttec = (TaskRequestMessage.TaskInfo.EngineParam.SttEngineConfig)ep.config();
-                                                            yield new JSONObject(); }
+                                                            yield new JSONObject(Map.of("lang", sttec.lang())); }
                                                         case STF -> {
                                                             final TaskRequestMessage.TaskInfo.EngineParam.StfEngineConfig stfec = (TaskRequestMessage.TaskInfo.EngineParam.StfEngineConfig)ep.config();
                                                             yield new JSONObject(); } })); }
@@ -364,23 +393,34 @@ public abstract class RelayWebSocketHandler extends BasicWebSocketHandler {
                                             final TaskRequestMessage.TaskInfo.RagParam rp = (TaskRequestMessage.TaskInfo.RagParam)task.param();
                                             final TaskRequestMessage.TaskInfo.RagParam.CommonRagConfig crc = (TaskRequestMessage.TaskInfo.RagParam.CommonRagConfig)rp.config();
                                             yield new JSONObject(Map.of(
-                                                    "top_k", crc.topK(),
-                                                    "top_p", crc.topP(),
-                                                    "temperature", crc.temperature(),
-                                                    "presence_penalty", crc.presencePenalty(),
-                                                    "frequency_penalty", crc.frequencyPenalty(),
-                                                    "beam_width", crc.beamWidth())); }
+                                                    "id", rp.id().toString(),
+                                                    "prompts", new JSONArray(rp.prompts()
+                                                            .stream()
+                                                            .map(prompt -> new JSONObject(Map.of(
+                                                                    "role", prompt.getRole().getCode(),
+                                                                    "content", prompt.getContent())))
+                                                            .toList()),
+                                                    "config", new JSONObject(Map.of(
+                                                            "top_k", crc.topK(),
+                                                            "top_p", crc.topP(),
+                                                            "temperature", crc.temperature(),
+                                                            "presence_penalty", crc.presencePenalty(),
+                                                            "frequency_penalty", crc.frequencyPenalty(),
+                                                            "beam_width", crc.beamWidth())))); }
                                         case VAD -> {
                                             final TaskRequestMessage.TaskInfo.VadParam vadp = (TaskRequestMessage.TaskInfo.VadParam)task.param();
-                                            yield switch(vadp.type()) {
-                                                case STT -> {
-                                                    final TaskRequestMessage.TaskInfo.VadParam.SttVadConfig svadc = (TaskRequestMessage.TaskInfo.VadParam.SttVadConfig)vadp.config();
-                                                    yield new JSONObject(Map.of(
-                                                            "threshold", new JSONObject(Map.of(
-                                                                    "start", svadc.threshold().start(),
-                                                                    "end", svadc.threshold().end())),
-                                                            "min_speech_duration", svadc.minSpeechDuration(),
-                                                            "speech_pad", svadc.speechPad())); } }; }
+                                            yield new JSONObject(Map.of(
+                                                    "type", vadp.type(),
+                                                    "target", vadp.target(),
+                                                    "config", switch(vadp.type()) {
+                                                        case STT -> {
+                                                            final TaskRequestMessage.TaskInfo.VadParam.SttVadConfig svadc = (TaskRequestMessage.TaskInfo.VadParam.SttVadConfig)vadp.config();
+                                                            yield new JSONObject(Map.of(
+                                                                    "threshold", new JSONObject(Map.of(
+                                                                            "start", svadc.threshold().start(),
+                                                                            "end", svadc.threshold().end())),
+                                                                    "min_speech_duration", svadc.minSpeechDuration(),
+                                                                    "speech_pad", svadc.speechPad())); } })); }
                                         case AGENT -> {
                                             final TaskRequestMessage.TaskInfo.AgentParam agp = (TaskRequestMessage.TaskInfo.AgentParam)task.param();
                                             final TaskRequestMessage.TaskInfo.AgentParam.CommonAgentConfig cagc = (TaskRequestMessage.TaskInfo.AgentParam.CommonAgentConfig)agp.config();

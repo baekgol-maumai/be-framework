@@ -3,6 +3,7 @@ package ai.maum.beframework.vo.meta.task.engine.llm;
 import ai.maum.beframework.codemessage.SystemCodeMsg;
 import ai.maum.beframework.vo.BaseException;
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.Arrays;
  * LLM 역할
  * @author baekgol@maum.ai
  */
+@Getter
 @RequiredArgsConstructor
 public enum LlmRole {
     ROLE_SYSTEM("system"),
